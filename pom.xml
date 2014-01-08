@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.logentries</groupId>
     <artifactId>logentries-appender</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>Logentries Appender</name>
     <version>1.1.21-SNAPSHOT</version>
     <description>Contains logback and log4j appenders that will send log data to Logentries</description>
@@ -35,6 +35,12 @@
         </developer>
     </developers>
 
+    <properties>
+        <karaf.version>2.3.1</karaf.version>
+        <karaf-tooling.version>2.3.3</karaf-tooling.version>
+        <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -44,6 +50,32 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                </configuration>
+            </plugin>
+            <!-- OSGI bundle -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${maven-bundle-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${groupId}.${artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Fragment-Host>org.ops4j.pax.logging.pax-logging-service</Fragment-Host>
+                        <Export-Package>com.logentries*;version=${project.version}</Export-Package>
+                        <Import-Package>
+                            com.ibm.uvm.tools;resolution:=optional,
+                            com.sun.jdmk.comm;resolution:=optional,
+                            javax.jmdns;resolution:=optional,
+                            javax.jms;resolution:=optional,
+                            javax.mail;resolution:=optional,
+                            javax.mail.internet;resolution:=optional,
+                            *
+                        </Import-Package>
+                        <Dynamic-Import>javax.*</Dynamic-Import>
+                        <Embed-Dependency>log4j;scope=compile;inline=true</Embed-Dependency>
+                    </instructions>
                 </configuration>
             </plugin>
         </plugins>
@@ -97,6 +129,13 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>karaf-bundle</id>
+            <build>
+                <plugins>
                 </plugins>
             </build>
         </profile>
